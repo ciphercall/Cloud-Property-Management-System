@@ -1,0 +1,293 @@
+﻿@using System.Data
+@using System.Data.SqlClient
+
+@using Cloud_Property.Controllers
+@using Cloud_Property.Models
+@model Cloud_Property.Models.PageModel
+
+
+@{
+    ViewBag.Title = "Project Group";
+
+    if (HttpContext.Current.Session["LoggedUserType"] == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+    }
+
+    var LoggedUserTp = HttpContext.Current.Session["LoggedUserType"].ToString();
+    var LoggedUserStatus = HttpContext.Current.Session["LoggedUserStatus"].ToString();
+    var LoggedCompanyStatus = HttpContext.Current.Session["LoggedCompanyStatus"].ToString();
+
+    if ((LoggedUserTp == "CompanyAdmin" || LoggedUserTp == "AslSuperadmin") && LoggedUserStatus == "A" && LoggedCompanyStatus == "A")
+    {
+
+    }
+    else
+    {
+        Response.Redirect(Url.Action("Index", "Logout"));
+    }
+
+    Int64 compid = Convert.ToInt64(System.Web.HttpContext.Current.Session["loggedCompID"]);
+    PropertyDbContext db = new PropertyDbContext();
+    //var abc = AppController.Global.GlobalVariable;
+
+
+    TimeZoneInfo timeZoneInfo;
+    timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Central Asia Standard Time");
+    DateTime currentDateTime = TimeZoneInfo.ConvertTime(DateTime.Now, timeZoneInfo);
+
+}
+@*<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.js"></script>*@
+
+<script type="text/javascript">
+
+    //function Show_Div(Div_id) {
+    //    if (false == $(Div_id).is(':visible')) {
+    //        $(Div_id).show(250);
+    //    }
+    //    else {
+    //        $(Div_id).hide(250);
+    //    }
+    //}
+</script>
+
+
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(false)
+
+    @*@Html.Hidden("name", "forslide", new { id = "txtslidestatus", @Value = abc })*@
+    @*@Html.HiddenFor(model => model.USERID, new { id = "txtUserId" })*@
+
+
+    @*<div id="Div_1" style=" background-color: #ffffdd; width: 300px;">
+
+            I am div
+            <br />
+            you can see me.
+        </div>*@
+    if (System.Web.HttpContext.Current.Session["LoggedUserType"] != null && System.Web.HttpContext.Current.Session["LoggedUserStatus"].ToString() == "A" && (System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() == "CompanyAdmin" || System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() == "UserAdmin" || System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() == "User"))
+    {
+        <div id="contentHeaderBox" style="border-bottom: none;height: auto">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="active">@Html.ActionLink("Project", "Project", "GraphView", new { style = "color: black;background-color: gainsboro;" })</li>
+
+                @if (System.Web.HttpContext.Current.Session["LoggedUserType"].ToString() != "User")
+                {
+                    <li>@Html.ActionLink("Today", "Today", "GraphView", new { style = "color: black" })</li>
+                    <li>@Html.ActionLink("Yesterday", "LastOneDay", "GraphView", new { style = "color: black" })</li>
+                    <li>@Html.ActionLink("Last 7 Day", "Last7Day", "GraphView", new { style = "color: black" })</li>
+                    <li>@Html.ActionLink("Last 1 Month", "LastOneMonth", "GraphView", new { style = "color: black" })</li>
+                    <li>@Html.ActionLink("Last 1 Year", "LastOneYear", "GraphView", new { style = "color: black" })</li>
+                }
+
+
+            </ul>
+
+        </div>
+    }
+    <br />
+
+    <div class="col-md-12">
+
+        <table id="mainTable" border="0" width="100%">
+            <thead>
+                <tr>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+                    <td width="10%"></td>
+                    <td width="5%"></td>
+
+
+
+
+
+
+
+
+                </tr>
+
+
+
+                <tr style="background-color: #00689b; outline: thin solid">
+
+                    <td colspan="2" style="color: white; padding: 4px;font-size:small" align="left">Project Category</td>
+                    <td colspan="4" style="color: white; padding: 4px;font-size:small" align="left">Project Name</td>
+                    @*<td colspan="2" style="color: white; padding: 4px;font-size:small" align="center">Project ShortID</td>*@
+
+                    <td colspan="2" style="color: white; padding: 4px;font-size:small" align="left">Project Year</td>
+                    <td colspan="4" style="color: white; padding: 4px;font-size:small" align="left">Location</td>
+                    @*<td colspan="1" style="color: white; padding: 4px;font-size:small" align="center">City</td>*@
+                    <td colspan="2" style="color: white; padding: 4px;font-size:small" align="center">Preview</td>
+
+                </tr>
+
+            </thead>
+
+            @{
+    var search_project = (from n in db.GlCostPoolDbSet where n.COMPID == compid select n).ToList();
+    string projectCat = "";
+            }
+
+
+            <tbody>
+
+                @foreach (var ss in search_project)
+                {
+
+                    var search_projectCat = (from n in db.GLCostPMSTDbSet where n.COMPID == ss.COMPID && n.COSTCID == ss.COSTCID select n).ToList();
+                    foreach (var x in search_projectCat)
+                    {
+                        projectCat = x.COSTCNM;
+                    }
+                    <tr>
+
+
+
+                        <td colspan="2" align="left">
+                            @projectCat
+                        </td>
+                        <td colspan="4" align="left">
+                            @ss.COSTPNM
+                        </td>
+                        @*<td colspan="2" align="center">
+                                @ss.COSTPSID
+                            </td>*@
+                        <td colspan="2" align="left">
+                            @ss.PROJECTFY
+                        </td>
+                        <td colspan="4" align="left">
+                            @ss.LOCATION
+                        </td>
+                        @*<td colspan="1" align="center">
+                                @ss.PCITY
+                            </td>*@
+
+
+
+
+
+                        <td colspan="2" align="center">
+                            <span>
+                                <a class="btn btn-sm btn-danger" target="_blank">
+
+                                    <i class="fa fa-pencil-square-o"></i>
+                                </a>
+                            </span>
+                        </td>
+                    </tr>
+
+                }
+
+
+
+
+
+            </tbody>
+        </table>
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+    //Auto complete
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            //$(function () {
+
+            //    $('#divslide').click(function () {
+            //        var txt = document.getElementById('txtslidestatus');
+            //        if (txt.value == 0) {
+            //            $('#txtslidestatus').val("1");
+            //        } else {
+            //            $('#txtslidestatus').val("0");
+
+            //        }
+
+
+            //    });
+
+            //});
+
+        });
+
+    </script>
+
+
+    <style type="text/css">
+        .ui-autocomplete {
+            position: absolute;
+            cursor: default;
+            background: #f0ffff;
+        }
+
+        /* workarounds */
+        html .ui-autocomplete {
+            width: 1px;
+        }
+        /* without this, the menu expands to 100% in IE6 */
+        .ui-menu {
+            list-style: none;
+            padding: 2px;
+            margin: 0;
+            display: block;
+            float: left;
+        }
+
+            .ui-menu .ui-menu {
+                margin-top: -3px;
+            }
+
+            .ui-menu .ui-menu-item {
+                margin: 0;
+                padding: 0;
+                zoom: 1;
+                float: left;
+                clear: left;
+                width: 100%;
+            }
+
+                .ui-menu .ui-menu-item a {
+                    text-decoration: none;
+                    display: block;
+                    padding: .2em .4em;
+                    line-height: 1.5;
+                    zoom: 1;
+                }
+
+                    .ui-menu .ui-menu-item a.ui-state-hover,
+                    .ui-menu .ui-menu-item a.ui-state-active {
+                        font-weight: normal;
+                        margin: -1px;
+                    }
+    </style>
+
+}
+
+
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+
+<script src="~/Scripts/jquery-1.9.1.min.js"></script>
+<script src="~/Scripts/jquery-ui-1.10.4.min.js"></script>
+

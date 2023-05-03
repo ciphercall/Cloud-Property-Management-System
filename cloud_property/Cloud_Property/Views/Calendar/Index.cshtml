@@ -1,0 +1,17 @@
+﻿@{
+    ViewBag.Title = "DHXScheduler initialization sample";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+    <div class="col-md-12">
+        <div style="height:700px;width:900px;margin:0 auto">
+            @Html.Raw(Model.Render())
+        </div>
+    </div>
+
+}
